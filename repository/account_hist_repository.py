@@ -6,7 +6,7 @@ account_hist 테이블에 저장
 class AccountHistRepository:
 
 
-    def insert(session, account_hist: AccountHist):
+    def insert(self, session, account_hist: AccountHist):
         session.add(account_hist)
         session.commit()
 

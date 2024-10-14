@@ -1,27 +1,18 @@
-# SQLite 데이터베이스 경로
-import sqlite3
-from sqlalchemy import create_engine, Column, Integer, String, text
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy import text
 from test.table_definition import TableDefinition
 
-def init():
-    conn = get_db_connection_by_sqlalchemy()
-
-
-def get_db_connection_by_sqlalchemy():
-    engine = create_engine('sqlite:///:memory:', echo=True)
-    Base = declarative_base()
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    Base.metadata.create_all(engine)
-    return engine.raw_connection()
+def create_table(engine):
+    create_job_hist_table(engine)
+    create_account_base_table(engine)
+    create_account_hist_table(engine)
+    create_customer_table(engine)
 
 
 '''
 입금 출금 작업 요청 기록 테이블을 생성함 (테스트 목적 )
 id : 자동 증가
 '''
-def create_job_hist_table(conn):
+def create_job_hist_table(engine):
 
     job_hist = TableDefinition(
         "job_hist",
@@ -38,17 +29,16 @@ def create_job_hist_table(conn):
             "modified_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
         }
     )
-    cursor = conn.cursor()
     create_query = job_hist.create_table_query()
-    cursor.execute(create_query)
-    conn.commit()
+    with engine.connect() as connection:
+        connection.execute(text(create_query))
 
 
 
 '''
 계좌 기본 원장 (로컬 테스트 목적)
 '''
-def create_account_base_table(conn):
+def create_account_base_table(engine):
     acconut_base = TableDefinition(
         "acconut_base",
         {
@@ -62,16 +52,15 @@ def create_account_base_table(conn):
             "modified_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
         }
     )
-    cursor = conn.cursor()
     create_query = acconut_base.create_table_query()
-    cursor.execute(create_query)
-    conn.commit()
+    with engine.connect() as connection:
+        connection.execute(text(create_query))
 
 
 '''
 계좌 이력 원장 (로컬 테스트 목적)
 '''
-def create_account_hist_table(conn):
+def create_account_hist_table(engine):
     acconut_hist = TableDefinition(
         "acconut_hist",
         {
@@ -86,15 +75,14 @@ def create_account_hist_table(conn):
             "modified_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
         }
     )
-    cursor = conn.cursor()
     create_query = acconut_hist.create_table_query()
-    cursor.execute(create_query)
-    conn.commit()
+    with engine.connect() as connection:
+        connection.execute(text(create_query))
 
 '''
 고객 원장
 '''
-def create_customer_table(conn):
+def create_customer_table(engine):
     acconut_hist = TableDefinition(
         "acconut_hist",
         {
@@ -105,7 +93,6 @@ def create_customer_table(conn):
             "modified_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
         }
     )
-    cursor = conn.cursor()
     create_query = acconut_hist.create_table_query()
-    cursor.execute(create_query)
-    conn.commit()
+    with engine.connect() as connection:
+        connection.execute(text(create_query))
