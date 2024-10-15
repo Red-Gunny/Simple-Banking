@@ -24,7 +24,8 @@ class DepositService:
         job_hist = self.convert_job_hist_model(request_obj)
         self.job_hist_repository.insert(session, job_hist)
 
-        # (2) 작업 이력 저장
+        # TODO 1 : update해야 함
+        # (2) 계좌 기본 저장
         account_base = self.convert_account_base_entity(request_obj)
         self.account_base_repository.insert(session, account_base)
 
@@ -36,7 +37,7 @@ class DepositService:
 
 
     '''
-    JOB_HIST 엔티티 매핑
+        JOB_HIST 엔티티 매핑
     '''
     def convert_job_hist_entity(request_obj):
         job_hist = JobHist()
@@ -72,9 +73,8 @@ class DepositService:
         return account_base
 
     '''
-            ACCOUNT_BASE 엔티티 매핑
-        '''
-
+        ACCOUNT_HIST 엔티티 매핑
+    '''
     def convert_account_hist_entity(request_obj):
         account_hist = AccountHist()
         account_hist.job_id = str(uuid.uuid4()).replace("-", "")

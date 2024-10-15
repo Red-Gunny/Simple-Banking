@@ -1,10 +1,8 @@
-from dataclasses import dataclass
 from pydantic import BaseModel
 
-
-class DepositRequest(BaseModel):
+class WithdrawRequest:
     account_id: str
     user_id: str
-    amount: int
+    amount: str
     request_time: str
 

@@ -39,8 +39,8 @@ def create_job_hist_table(engine):
 계좌 기본 원장 (로컬 테스트 목적)
 '''
 def create_account_base_table(engine):
-    acconut_base = TableDefinition(
-        "acconut_base",
+    account_base = TableDefinition(
+        "account_base",
         {
             "id": "INTEGER PRIMARY KEY AUTOINCREMENT",      # Sqlite3 에서는 8바이트
             "account_id": "VARCHAR(255) UNIQUE NOT NULL",
@@ -52,7 +52,7 @@ def create_account_base_table(engine):
             "modified_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
         }
     )
-    create_query = acconut_base.create_table_query()
+    create_query = account_base.create_table_query()
     with engine.connect() as connection:
         connection.execute(text(create_query))
 
@@ -61,8 +61,8 @@ def create_account_base_table(engine):
 계좌 이력 원장 (로컬 테스트 목적)
 '''
 def create_account_hist_table(engine):
-    acconut_hist = TableDefinition(
-        "acconut_hist",
+    account_hist = TableDefinition(
+        "account_hist",
         {
             "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
             "account_id": "VARCHAR(255) UNIQUE NOT NULL ",
@@ -75,7 +75,7 @@ def create_account_hist_table(engine):
             "modified_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
         }
     )
-    create_query = acconut_hist.create_table_query()
+    create_query = account_hist.create_table_query()
     with engine.connect() as connection:
         connection.execute(text(create_query))
 
@@ -83,16 +83,16 @@ def create_account_hist_table(engine):
 고객 원장
 '''
 def create_customer_table(engine):
-    acconut_hist = TableDefinition(
-        "acconut_hist",
+    customer_base = TableDefinition(
+        "customer_base",
         {
-            "id": "BIGINT PRIMARY KEY AUTOINCREMENT",
+            "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
             "customer_id": "VARCHAR(255) UNIQUE NOT NULL",
             "status": "VARCHAR(4) NOT NULL",
             "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
             "modified_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
         }
     )
-    create_query = acconut_hist.create_table_query()
+    create_query = customer_base.create_table_query()
     with engine.connect() as connection:
         connection.execute(text(create_query))
