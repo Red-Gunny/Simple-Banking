@@ -9,19 +9,25 @@ class AccountHistRepository:
         session.add(account_hist)
         session.commit()
 
-#User.id >= 1, User.email == 'example@example.com'
-    def search_by_dttm_and_job_div(self, customer_id, account_id, from_dttm, to_dttm, banking_div):
 
-        # from_dttm, to_dttm이 정상적으로 포함했는지 확인 필요함
-        # bankingdiv 도 마찬가지
-        accounts = (AccountHist.query
-                    .filter(AccountHist.account_id == account_id
-                            , AccountHist.customer_id == customer_id
-                            , AccountHist.created_at >= from_dttm
-                            , AccountHist.created_at <= to_dttm
-                            , AccountHist.banking_div == banking_div)
-                    .limit(20)
-                    .all()
-                    )
+    '''
+    기간 및 입출금에 따라 거래 내역 조회
+    '''
+    def search_by_dttm_and_job_div(self, session, customer_id, account_id, from_dttm, to_dttm, banking_div):
+        print("Repository 계층 인입")
+        account_hist = session.query(AccountHist).filter(AccountHist.account_id == account_id, AccountHist.customer_id == customer_id)
+
+        if from_dttm is not None:
+            account_hist = session.query(AccountHist).filter(AccountHist.created_at >= from_dttm)
+
+        if to_dttm is not None:
+            account_hist = session.query(AccountHist).filter(AccountHist.created_at <= to_dttm)
+
+        #if banking_div is not None:
+            #account_hist = session.query(AccountHist).filter(AccountHist.banking_div == banking_div)
+
+        print("Repository 계층 아웃")
+        return account_hist.limit(20).all()
+
 
 

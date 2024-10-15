@@ -55,13 +55,22 @@ def get_transactions(account_id):
                                                                           , customer_id=hist_request.customer_id)
     if not is_valid:
         error_response = ErrorResponse(
-            account_id=hist_request.account_id,
-            customer_id=hist_request.customer_id,
-            error_cd=str(9999),
-            error_reason="고객 계좌번호 미보유"
+            account_id=hist_request.account_id
+            , customer_id=hist_request.customer_id
+            , error_cd=str(9999)
+            , error_reason="고객 계좌번호 미보유"
         )
         return jsonify(error_response.model_dump())
 
+    print("search_banking_hist_by_conditions 전 ")
+    print(hist_request.account_id)
+    print(hist_request.customer_id)
+    print(hist_request.search_from_dt)
+    print(hist_request.search_from_dt)
+    account_search_service.search_banking_hist_by_conditions(session=session
+                                                             , hist_request=hist_request)
+
+    print("search_banking_hist_by_conditions 후 ")
 
     # 조회 코드 작성해야 함
     return "whghl"
@@ -76,7 +85,7 @@ def deposit():
     deposit_request = DepositRequest(**request.json)
 
     # 계좌 유효성 검사
-    account_search_service = AccountSearchService()
+
     is_valid = account_search_service.check_valid_account_by_customer_id(deposit_request.account_id)
     if not is_valid:
         return "error"

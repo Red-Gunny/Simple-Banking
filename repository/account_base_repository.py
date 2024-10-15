@@ -10,9 +10,8 @@ class AccountBaseRepository:
         session.commit()
 
 
-    ## 결과 미조회 일 수도 있음
+    ## 고객번호에 해당하는 account 정보를 반환함
     def search_by_customer_Id(self, session, customer_id):
-        #accounts = ccountBase.query.filter(AccountBase.customer_id == customer_id).all()
         accounts = session.query(AccountBase).filter(AccountBase.customer_id == customer_id).all()
         return accounts
 
