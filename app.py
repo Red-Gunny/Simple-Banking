@@ -3,6 +3,7 @@ from config import db_config
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 from init.init import create_table
 from serial.request.banking_hist_request import BankingHistRequest
@@ -35,11 +36,15 @@ def hello():
 def get_transactions(account_id):
     if request.json is None:
         return "error"
+
+    # 트랜잭션용 Session 객체 생성
     session = Session()
 
     # API 데이터 <-> 객체 변환
     hist_request = BankingHistRequest(**request.args.to_dict())
     hist_request.account_id = account_id
+    if hist_request.request_dttm is None:
+        hist_request.request_dttm = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # 디버깅을 위해 쿼리 파라미터를 출력
     print(f"  account_id: {hist_request.account_id}"
@@ -47,7 +52,7 @@ def get_transactions(account_id):
           f", search_from_dt: {hist_request.search_from_dt}"
           f", search_to_dt: {hist_request.search_to_dt}"
           f", filter_action: {hist_request.filter_action}"
-          f", request_time: {hist_request.request_time}")
+          f", request_time: {hist_request.request_dttm}")
 
     # 계좌 유효성 검사
     is_valid = account_search_service.check_valid_account_by_customer_id( session=session
@@ -67,13 +72,13 @@ def get_transactions(account_id):
     print(hist_request.customer_id)
     print(hist_request.search_from_dt)
     print(hist_request.search_from_dt)
-    account_search_service.search_banking_hist_by_conditions(session=session
+    banking_hist_response = account_search_service.search_banking_hist_by_conditions(session=session
                                                              , hist_request=hist_request)
 
     print("search_banking_hist_by_conditions 후 ")
 
     # 조회 코드 작성해야 함
-    return "whghl"
+    return jsonify(banking_hist_response.model_dump())
 
 
 @app.route('/api/v1/deposit', methods=['POST'])

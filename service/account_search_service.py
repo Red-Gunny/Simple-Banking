@@ -1,6 +1,7 @@
 from repository.account_base_repository import AccountBaseRepository
 from repository.account_hist_repository import AccountHistRepository
 from serial.request import banking_hist_request
+from serial.response.banking_hist_response import Banking, BankingHistResponse
 
 
 class AccountSearchService:
@@ -33,19 +34,32 @@ class AccountSearchService:
         print(hist_request.search_from_dt)
         print(hist_request.search_to_dt)
         print(hist_request.filter_action)
-        print(hist_request.request_time)
+        print(hist_request.request_dttm)
 
-        result = self.account_hist_repository.search_by_dttm_and_job_div(
+        hist_list = self.account_hist_repository.search_by_dttm_and_job_div(
             session
             , customer_id = hist_request.customer_id
             , account_id = hist_request.account_id
             , from_dttm = hist_request.search_from_dt
             , to_dttm = hist_request.search_to_dt
-            , banking_div = hist_request.filter_action
+            , proc_div = hist_request.filter_action
         )
-        print(result)
+
+        bankings = []
+        for hist in hist_list:
+            banking = Banking.model_validate(hist)
+            bankings.append(banking)
+        print(bankings)  # 리스트
+        banking_hist_response = BankingHistResponse(
+            account_id = hist_request.account_id
+            , customer_id = hist_request.customer_id
+            , request_dttm = hist_request.request_dttm
+            , Bakings = bankings
+        )
+
+
         print("service 계층 아웃")
-        return result
+        return banking_hist_response
 
 
 

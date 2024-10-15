@@ -10,6 +10,7 @@ class TableDefinition:
         for column_name, column_type in self.columns.items():
             column_defs.append(f"{column_name} {column_type}")
         column_defs_str = ", ".join(column_defs)
-        return f"CREATE TABLE IF NOT EXISTS {self.table_name} ({column_defs_str});" # f는 문자열에 변수를 넣을 때 사용
+        ddl = f"CREATE TABLE IF NOT EXISTS {self.table_name} ({column_defs_str});" # f는 문자열에 변수를 넣을 때 사용
+        return ddl
 
 

@@ -9,5 +9,5 @@ class BankingHistRequest(BaseModel):
     search_from_dt: Optional[str] = None
     search_to_dt: Optional[str] = None
     filter_action: Optional[str] = None
-    request_time: Optional[str] = None
+    request_dttm: Optional[str] = None
 
