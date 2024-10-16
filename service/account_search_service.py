@@ -25,7 +25,7 @@ class AccountSearchService:
     조회조건 2 : 출금 / 입금
     from_dttm, to_dttm, banking_div
     '''
-    def search_banking_hist_by_conditions(self, session, hist_request:banking_hist_request):
+    def search_banking_hist_by_conditions(self, session, hist_request : banking_hist_request):
 
         print("service 계층 인입")
 

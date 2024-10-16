@@ -12,21 +12,24 @@ from serial.request.withdraw_request import WithdrawRequest
 from serial.response.error_response import ErrorResponse
 from service.account_search_service import AccountSearchService
 from service.deposit_service import DepositService
+from service.job_hist_control_service import JobHistControlService
 from service.withdraw_service import WithdrawService
 
 app = Flask(__name__)                  # Flask 어플리케이션 인스턴스를 생성한다.
 app.config.from_object(db_config)      # 설정 객체를 로드해서 Flask 어플리케이션에 적용한다.
-#db = SQLAlchemy(app)
 
 engine = create_engine('sqlite:///my_database.db', echo=True)     # DB 연결주소 / 실행 쿼리 표시
 Session = sessionmaker(bind=engine)     # Session은 세션 팩토리
 create_table(engine)
-#conn = engine.raw_connection()
-
 
 ''' 필요 객체 정의'''
 account_search_service = AccountSearchService()
+deposit_service = DepositService()
+withdraw_service = WithdrawService()
+job_hist_control_service = JobHistControlService()
 
+
+# PostMan 테스트 용
 @app.route('/', methods=['GET'])
 def hello():
     return "this is banking"
@@ -35,7 +38,11 @@ def hello():
 @app.route('/api/v1/<account_id>/transactions', methods=['GET'])
 def get_transactions(account_id):
     if request.json is None:
-        return "error"
+        error_response = ErrorResponse(
+            error_cd = str(9999)
+            , error_reason = "JSON 객체 오류"
+        )
+        return jsonify(error_response.model_dump())
 
     # 트랜잭션용 Session 객체 생성
     session = Session()
@@ -47,12 +54,14 @@ def get_transactions(account_id):
         hist_request.request_dttm = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # 디버깅을 위해 쿼리 파라미터를 출력
+    ''' ###################  로컬테스트 디버깅 용 ################### '''
     print(f"  account_id: {hist_request.account_id}"
           f", customer_id: {hist_request.customer_id}"
           f", search_from_dt: {hist_request.search_from_dt}"
           f", search_to_dt: {hist_request.search_to_dt}"
           f", filter_action: {hist_request.filter_action}"
           f", request_time: {hist_request.request_dttm}")
+    ''' ######################################################## '''
 
     # 계좌 유효성 검사
     is_valid = account_search_service.check_valid_account_by_customer_id( session=session
@@ -67,16 +76,19 @@ def get_transactions(account_id):
         )
         return jsonify(error_response.model_dump())
 
+    ''' ###################  로컬테스트 디버깅 용 ################### '''
     print("search_banking_hist_by_conditions 전 ")
     print(hist_request.account_id)
     print(hist_request.customer_id)
     print(hist_request.search_from_dt)
     print(hist_request.search_from_dt)
+    ''' ######################################################## '''
+
     banking_hist_response = account_search_service.search_banking_hist_by_conditions(session=session
                                                              , hist_request=hist_request)
-
+    ''' ###################  로컬테스트 디버깅 용 ################### '''
     print("search_banking_hist_by_conditions 후 ")
-
+    ''' ######################################################## '''
     # 조회 코드 작성해야 함
     return jsonify(banking_hist_response.model_dump())
 
@@ -84,45 +96,104 @@ def get_transactions(account_id):
 @app.route('/api/v1/deposit', methods=['POST'])
 def deposit():
     if request.json is None:
-        return "error"
+        error_response = ErrorResponse(
+            error_cd=str(9999)
+            , error_reason="JSON 객체 오류"
+        )
+        return jsonify(error_response.model_dump())
 
+    # 트랜잭션 시작
     session = Session()
+    print("트랜잭션 시작")
+
+    # API 데이터 <-> 객체 변환
     deposit_request = DepositRequest(**request.json)
+    print("API 데이터 <-> 객체 변환")
+
+    # 작업 이력 테이블 내 요청 내용 기록
+    job_hist, job_id = job_hist_control_service.insert_ready_job(session = session
+                                                                 , customer_id = deposit_request.customer_id
+                                                                 , account_id = deposit_request.account_id
+                                                                 , amount = int(deposit_request.amount)
+                                                                 , job_div = "0001")
+    session.commit()
+    print("작업 이력 테이블 내 요청 내용 기록")
 
     # 계좌 유효성 검사
-
-    is_valid = account_search_service.check_valid_account_by_customer_id(deposit_request.account_id)
+    is_valid = account_search_service.check_valid_account_by_customer_id(session= session
+                                                                         , account_id = deposit_request.account_id
+                                                                         , customer_id = deposit_request.customer_id)
+    print("계좌 유효성 검사")
     if not is_valid:
-        return "error"
+        # 작업 이력 테이블 내 작업 실패 기록
+        job_hist_control_service.update_fail_job(session=session, job_id=job_id)
+        # 작업 실패 응답 반환
+        error_response = ErrorResponse(
+            account_id=deposit_request.account_id
+            , customer_id=deposit_request.customer_id
+            , error_cd=str(9999)
+            , error_reason="고객 계좌번호 미보유"
+        )
+        return jsonify(error_response.model_dump())
 
-    # deposit 수행
-    deposit_service = DepositService()
-    result = deposit_service.deposit(session, deposit_request)
-    if result:
-        return "happy banking"
-    else :
-        return "unhappy"
+    # 입금 수행
+    deposit_response = deposit_service.deposit(session = session, request_obj=deposit_request, job_req_id= job_id)
+    print("입금 수행")
+
+    # 작업 이력 테이블 내 작업 성공 기록
+    job_hist_control_service.update_success_job(session = session, job_id=job_id)
+    session.commit()
+    print("작업 이력 테이블 내 작업 성공 기록")
+
+    return jsonify(deposit_response.model_dump())
 
 
 @app.route('/api/v1/withdraw', methods=['POST'])
 def withdraw():
     if request.json is None:
-        return "error"
+        error_response = ErrorResponse(
+            error_cd=str(9999)
+            , error_reason="JSON 객체 오류"
+        )
+        return jsonify(error_response.model_dump())
+
+    # 트랜잭션 시작
     session = Session()
+
+    # API 데이터 <-> 객체 변환
     withdraw_request = WithdrawRequest(**request.json)
 
+    # 작업 이력 테이블 내 요청 내용 기록
+    job_hist, job_id = job_hist_control_service.insert_ready_job(session=session
+                                                                 , customer_id=withdraw_request.customer_id
+                                                                 , account_id=withdraw_request.account_id
+                                                                 , amount=int(withdraw_request.amount)
+                                                                 , job_div = "0002")
+
     # 계좌 유효성 검사
-    account_search_service = AccountSearchService()
-    is_valid = account_search_service.check_valid_account_by_customer_id(withdraw_request.account_id)
+    is_valid = account_search_service.check_valid_account_by_customer_id(session= session
+                                                                         , account_id = withdraw_request.account_id
+                                                                         , customer_id = withdraw_request.customer_id)
+    # 예외 처리 - 고객 계좌 매핑 오류
     if not is_valid:
-        return "error"
+        # 작업 이력 테이블 내 작업 실패 기록
+        job_hist_control_service.update_fail_job(session=session, job_id=job_id)
+        # 작업 실패 응답 반환
+        error_response = ErrorResponse(
+            account_id=withdraw_request.account_id
+            , customer_id=withdraw_request.customer_id
+            , error_cd=str(9999)
+            , error_reason="고객 계좌번호 미보유"
+        )
+        return jsonify(error_response.model_dump())
 
     # 출금 수행
-    withdraw_service = WithdrawService()
-    result = withdraw_service.withdraw(session, withdraw_request)
-    if result :
-        return "happy banking"
-    else :
-        return "unhappy"
+    wtihdraw_response = withdraw_service.withdraw(session=session, request_obj = withdraw_request, job_req_id=job_id)
+
+    # 작업 이력 테이블 내 작업 성공 기록
+    job_hist_control_service.update_success_job(session=session, job_id=job_id)
+    session.commit()
+
+    return jsonify(wtihdraw_response.model_dump())
 
 

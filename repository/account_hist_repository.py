@@ -5,10 +5,9 @@ account_hist 테이블에 저장
 '''
 class AccountHistRepository:
 
-    def insert(self, session, account_hist: AccountHist):
-        session.add(account_hist)
-        session.commit()
-
+    def search_last_account_history(self, session, account_id):
+        last_account = session.query(AccountHist).filter(AccountHist.account_id == account_id).order_by(AccountHist.seq.desc()).first()
+        return last_account
 
     '''
     기간 및 입출금에 따라 거래 내역 조회
@@ -28,6 +27,11 @@ class AccountHistRepository:
 
         print("Repository 계층 아웃")
         return account_hist.limit(20).all()
+
+
+    def insert(self, session, account_hist: AccountHist):
+        session.add(account_hist)
+        session.commit()
 
 
 

@@ -13,7 +13,7 @@ class JobHist(Base):
     account_id = Column(String)
     job_div = Column(String)
     proc_stat_cd =  Column(String)
-    amount = Column(String)
+    amount = Column(Integer)
     request_dttm = Column(String)
     created_at = Column(String)
     modified_at = Column(String)
