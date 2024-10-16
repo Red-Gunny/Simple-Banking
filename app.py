@@ -55,12 +55,12 @@ def get_transactions(account_id):
 
     # 디버깅을 위해 쿼리 파라미터를 출력
     ''' ###################  로컬테스트 디버깅 용 ################### '''
-    print(f"  account_id: {hist_request.account_id}"
-          f", customer_id: {hist_request.customer_id}"
-          f", search_from_dt: {hist_request.search_from_dt}"
-          f", search_to_dt: {hist_request.search_to_dt}"
-          f", filter_action: {hist_request.filter_action}"
-          f", request_time: {hist_request.request_dttm}")
+    # print(f"  account_id: {hist_request.account_id}"
+    #       f", customer_id: {hist_request.customer_id}"
+    #       f", search_from_dt: {hist_request.search_from_dt}"
+    #       f", search_to_dt: {hist_request.search_to_dt}"
+    #       f", filter_action: {hist_request.filter_action}"
+    #       f", request_time: {hist_request.request_dttm}")
     ''' ######################################################## '''
 
     # 계좌 유효성 검사
@@ -78,10 +78,10 @@ def get_transactions(account_id):
 
     ''' ###################  로컬테스트 디버깅 용 ################### '''
     print("search_banking_hist_by_conditions 전 ")
-    print(hist_request.account_id)
-    print(hist_request.customer_id)
-    print(hist_request.search_from_dt)
-    print(hist_request.search_from_dt)
+    # print(hist_request.account_id)
+    # print(hist_request.customer_id)
+    # print(hist_request.search_from_dt)
+    # print(hist_request.search_from_dt)
     ''' ######################################################## '''
 
     banking_hist_response = account_search_service.search_banking_hist_by_conditions(session=session

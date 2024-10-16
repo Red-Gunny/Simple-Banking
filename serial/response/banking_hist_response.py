@@ -1,13 +1,14 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, Field, validator, field_validator
 
 
 class Banking(BaseModel):
+    banking_seq: int
     banking_dttm: str = Field(alias="proc_dttm")
     banking_amount: str = Field(alias="amount")
     after_balance: str = Field(alias="balance")
     banking_div : str = Field(alias="proc_div")
-    etc: str
+    etc: Optional[str] = Field(alias="etc")
 
     model_config = {
         'from_attributes': True  # ORM 객체로부터 변환 가능
@@ -25,6 +26,7 @@ class BankingHistResponse(BaseModel):
     account_id: str
     customer_id: str
     request_dttm: str
+    banking_cnt : int
     Bakings: List[Banking]
 
     model_config = {
