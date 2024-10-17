@@ -16,3 +16,113 @@
 날짜 자료형의 경우, 실제 시스템에서 연산하거나 작업할 때 사용하는 날짜 자료형과 DB에 레코드가 생성되고 수정되는 날짜 정보를 분리하였습니다. 데이터를 가공할 때 필요에 따라서 자료형을 변환해야 합니다. 그런데 `DATE` 자료형에 인덱스가 걸려있을 때 다른 자료형으로 변환하면 DB 인덱스를 사용할 수 없습니다. 또한 비교 연산 시 **문자열**과 `DATE` 자료형을 사용자의 실수로 올바르게 이루어지지 못할 가능성이 있습니다. 따라서 시스템 연산 및 작업에 필요한 날짜 데이터는 **문자열**(`VARCHAR`)을 사용하였습니다. 반면에 DB 레코드 생성/수정 시각을 기록하는 목적의 데이터 자료형은 `TIMESTAMP`를 사용하였습니다.
 
 일반 텍스트의 경우에는 확장 가능성만 고려하였습니다. 시스템을 운용하다가 자료형을 변경하면서 여러 부작용이 발생할 수 있기 때문에 **적요 항목**의 경우 `TEXT` 자료형을 설정하였습니다. 그 외에 자료형은 `VARCHAR` 자료형을 사용했습니다.
+
+
+
+# API Endpoint 설명
+
+## 1. 거래내역 조회 API
+
+### (1) 개요
+- **설명**: 고객의 계좌에 대해 특정 기간 동안의 거래 내역을 조회하는 API
+- **버전**: v1
+
+### (2) 요청
+
+#### 요청 정보
+- **HTTP 메소드**: GET
+- **URL**: `/api/v1/{account_id}/transactions`
+
+### URL 경로 변수
+
+| 필드명     | 타입   | 필수 여부 | 설명                        |
+|------------|--------|------------|-----------------------------|
+| account_id | String | Y          | 조회하고자 하는 계좌의 식별자 |
+
+### 쿼리 파라미터
+
+| 필드명        | 타입   | 필수 여부 | 설명                              |
+|---------------|--------|------------|-----------------------------------|
+| customer_id   | String | Y          | 고객 식별자                        |
+| search_from_dt| String | N          | 조회할 거래내역의 시작일시 (yyyy-MM-dd) |
+| search_to_dt  | String | N          | 조회할 거래내역의 종료일시 (yyyy-MM-dd) |
+| filter_action | String | N          | 거래 항목(0001: 입금, 0002: 출금)     |
+
+#### 요청 예시
+```
+GET http://127.0.0.1:5000/api/v1/123/transactions?customer_id=hong&search_from_dt=2024-09-01&search_to_dt=2024-11-01&filter_action=0001
+```
+
+### (3) 응답
+
+#### 응답 본문 형식 (Response Body)
+- **Content-Type**: application/json
+
+#### 응답 속성
+##### 거래내역(Bakings) 항목
+
+| 필드명      | 타입               | 필수 여부 | 설명                                |
+|-------------|--------------------|------------|-------------------------------------|
+| account_id  | String             | Y          | 조회하고자 하는 계좌의 식별자        |
+| Bakings     | Array of Objects   | N          | 거래 내역 리스트                     |
+| customer_id | String             | N          | 고객 식별자                          |
+| banking_cnt | Integer            | N          | 반환된 거래 내역의 총 개수            |
+| request_dttm| String             | N          | 거래내역 요청이 발생한 시간 (형식: YYYY-MM-DD HH:MM:SS) |
+
+##### 거래내역(Bakings) 항목
+
+| 필드명        | 타입      | 설명                                   |
+|---------------|-----------|----------------------------------------|
+| banking_seq   | Integer   | 거래내역의 순서 (역순 정렬)              |
+| banking_div   | String    | 거래 유형 (0001: 입금, 0002: 출금)       |
+| banking_amount| String    | 거래 금액                               |
+| after_balance | String    | 거래 후 잔액                            |
+| banking_dttm  | String    | 거래 발생 일시 (형식: YYYY-MM-DD HH:MM:SS)|
+| etc           | String    | 기타 정보 (거래 메모나 설명 등)           |
+
+
+#### 응답 예시
+```json
+{
+    "Bakings": [
+        {
+            "after_balance": "42000",
+            "banking_amount": "10000",
+            "banking_div": "0001",
+            "banking_dttm": "2024-10-16 20:21:49",
+            "banking_seq": 1,
+            "etc": "etc"
+        },
+        {
+            "after_balance": "32000",
+            "banking_amount": "10000",
+            "banking_div": "0001",
+            "banking_dttm": "2024-10-16 20:21:20",
+            "banking_seq": 2,
+            "etc": "etc"
+        },
+        {
+            "after_balance": "22000",
+            "banking_amount": "10000",
+            "banking_div": "0001",
+            "banking_dttm": "2024-10-16 20:20:24",
+            "banking_seq": 3,
+            "etc": "etc"
+        },
+        {
+            "after_balance": "12000",
+            "banking_amount": "10000",
+            "banking_div": "0001",
+            "banking_dttm": "2024-10-16 20:18:27",
+            "banking_seq": 4,
+            "etc": "etc"
+        }
+    ],
+    "account_id": "123",
+    "banking_cnt": 4,
+    "customer_id": "hong",
+    "request_dttm": "2024-10-16 21:08:03"
+}
+```
+
+
