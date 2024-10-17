@@ -28,7 +28,6 @@
 - **버전**: v1
 
 ### (2) 요청
-
 #### 요청 정보
 - **HTTP 메소드**: GET
 - **URL**: `/api/v1/{account_id}/transactions`
@@ -124,5 +123,76 @@ GET http://127.0.0.1:5000/api/v1/123/transactions?customer_id=hong&search_from_d
     "request_dttm": "2024-10-16 21:08:03"
 }
 ```
+@@@@@@@@@@@@@@@@@@@@@@@
+## 2. 입금 API
 
+### (1) 개요
+- **설명**: 고객이 요청한 금액을 계좌에서 출금하는 API
+- **버전**: v1
 
+### (2) 요청
+
+#### 요청 정보
+- **HTTP 메소드**: POST
+- **URL**: `/api/v1/deposit`
+
+#### 요청 헤더
+- **Content-Type**: application/json
+
+#### 요청 속성
+
+| 필드명            | 타입       | 설명                              |
+|---------------|--------|-----------------------------------|
+| account_id    | String | 입금 대상 계좌 식별자                        |
+| customer_id   | String | 고객 식별자                                    |
+| amount        | String | 입금 금액                                     |
+| etc           | String | 적요                                         |
+| request_time  | String | 요청 시각 (형식: YYYY-MM-DD HH:MM:SS)             |
+
+#### 요청 예시
+```
+{
+    "account_id" : "123",
+    "customer_id" : "hong",
+    "amount" : "10000",
+    "etc" : "etc",
+    "request_time" : "2024-10-16 20:04:00"
+}
+
+```
+
+### (3) 응답
+
+#### 응답 헤더
+- **Content-Type**: application/json
+
+#### 응답 속성
+
+| 필드명      | 타입               |  설명                                |
+|-------------|--------------------|---------------------------|
+| account_id  | String             | 입금 대상 계좌 식별자                                |
+| customer_id | String             | 고객 식별자                                      |
+| proc_id     | String             | 작업 요청 식별자                                 |
+| stat_cd     | String             | 처리 상태 코드 (0000: 성공, 9999: 실패)            |
+
+#### 응답 예시
+#### 성공
+```json
+{
+    "account_id": "123",
+    "customer_id": "hong",
+    "proc_id": "req123456",
+    "stat_cd": "0000"
+}
+
+```
+#### 실패
+```json
+{
+    "account_id": "123",
+    "customer_id": "hong",
+    "proc_id": "req123456",
+    "stat_cd": "9999"
+}
+
+```
