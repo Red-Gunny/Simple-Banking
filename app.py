@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 from config import db_config
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 from init.init import create_table
@@ -17,9 +16,10 @@ from service.withdraw_service import WithdrawService
 
 app = Flask(__name__)                  # Flask 어플리케이션 인스턴스를 생성한다.
 app.config.from_object(db_config)      # 설정 객체를 로드해서 Flask 어플리케이션에 적용한다.
-
 engine = create_engine('sqlite:///my_database.db', echo=True)     # DB 연결주소 / 실행 쿼리 표시
 Session = sessionmaker(bind=engine)     # Session은 세션 팩토리
+
+''' 테스트용 DB 생성 (없을 때)'''
 create_table(engine)
 
 ''' 필요 객체 정의'''
@@ -131,7 +131,7 @@ def deposit():
         error_response = ErrorResponse(
             account_id=deposit_request.account_id
             , customer_id=deposit_request.customer_id
-            , error_cd=str(9999)
+            , error_cd=str(4444)
             , error_reason="고객 계좌번호 미보유"
         )
         return jsonify(error_response.model_dump())
