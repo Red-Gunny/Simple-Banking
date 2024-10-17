@@ -11,7 +11,7 @@ def create_table(engine):
 작업 이력 테이블
 '''
 def create_job_hist_table(engine):
-    job_hist_query = '''CREATE TABLE job_hist (
+    job_hist_query = '''CREATE TABLE  IF NOT EXISTS job_hist (
                                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                                         job_id VARCHAR(255) UNIQUE NOT NULL,
                                         customer_id VARCHAR(255) NOT NULL,
@@ -77,7 +77,7 @@ def create_account_hist_table(engine):
 '''
 def create_customer_table(engine):
     customer_base_query = """
-                                CREATE TABLE customer_base (
+                                CREATE TABLE  IF NOT EXISTS customer_base (
                                                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                                                             customer_id VARCHAR(255) UNIQUE NOT NULL,
                                                             status VARCHAR(4) NOT NULL,
