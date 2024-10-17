@@ -26,31 +26,23 @@ class AccountSearchService:
     from_dttm, to_dttm, banking_div
     '''
     def search_banking_hist_by_conditions(self, session, hist_request : banking_hist_request):
-        print("service 계층 인입")
-
         hist_list = self.account_hist_repository.search_by_dttm_and_job_div(session = session
                                                                             , customer_id = hist_request.customer_id
                                                                             , account_id = hist_request.account_id
                                                                             , from_dttm = hist_request.search_from_dt
                                                                             , to_dttm = hist_request.search_to_dt
-                                                                            , proc_div = hist_request.filter_action
-                                                                        )
+                                                                            , proc_div = hist_request.filter_action)
         hist_list = sorted(hist_list, key=lambda x: x.id, reverse=True)
         bankings = []
         for idx, hist in enumerate(hist_list):
             hist.banking_seq = idx + 1
             banking = Banking.model_validate(hist)
             bankings.append(banking)
-
-        banking_hist_response = BankingHistResponse(
-            account_id = hist_request.account_id
-            , customer_id = hist_request.customer_id
-            , request_dttm = hist_request.request_dttm
-            , banking_cnt = len(bankings)
-            , Bakings = bankings
-        )
-
-        print("service 계층 아웃")
+        banking_hist_response = BankingHistResponse(account_id = hist_request.account_id
+                                                    , customer_id = hist_request.customer_id
+                                                    , request_dttm = hist_request.request_dttm
+                                                    , banking_cnt = len(bankings)
+                                                    , Bakings = bankings)
         return banking_hist_response
 
 

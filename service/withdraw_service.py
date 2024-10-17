@@ -57,53 +57,11 @@ class WithdrawService:
 
 
     def to_WithdrawResponse(self, request_obj, is_success, job_req_id):
-        response = WithdrawResponse(
-            account_id = request_obj.account_id
-            , customer_id = request_obj.customer_id
-            , proc_id = job_req_id
-            , stat_cd = "0000"
-        )
+        response = WithdrawResponse(account_id = request_obj.account_id
+                                    , customer_id = request_obj.customer_id
+                                    , proc_id = job_req_id
+                                    , stat_cd = "0000")
         if not is_success:
             response.stat_cd = "9999"
         return response
 
-
-
-'''
-deprecated code
-'''
-    # '''
-    #     JOB_HIST 엔티티 매핑
-    # '''
-    # def convert_job_hist_entity(self, request_obj, job_req_id):
-    #     job_hist = JobHist()
-    #     job_hist.job_id = job_req_id
-    #     job_hist.customer_id = request_obj.user_id
-    #     job_hist.account_id = request_obj.account_id
-    #     job_hist.job_div = "0001"
-    #     job_hist.proc_stat_cd = "0001"
-    #     job_hist.amount = int(request_obj.amount)
-    #     job_hist.request_dttm = request_obj.request_time
-    #     now = datetime.now()
-    #     formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
-    #     job_hist.created_at = formatted_time
-    #     job_hist.modified_at = formatted_time
-    #     return job_hist
-    #
-    # '''
-    #     ACCOUNT_BASE 엔티티 매핑
-    # '''
-    # def convert_account_base_entity(self, request_obj, job_req_id):
-    #     account_base = AccountBase()
-    #     account_base.job_id = job_req_id
-    #     account_base.customer_id = request_obj.user_id
-    #     account_base.account_id = request_obj.account_id
-    #     account_base.job_div = "0001"
-    #     account_base.proc_stat_cd = "0001"
-    #     account_base.amount = int(request_obj.amount)
-    #     account_base.request_dttm = request_obj.request_time
-    #     now = datetime.now()
-    #     formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
-    #     account_base.created_at = formatted_time
-    #     account_base.modified_at = formatted_time
-    #     return account_base

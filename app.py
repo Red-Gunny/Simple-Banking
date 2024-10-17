@@ -29,12 +29,6 @@ withdraw_service = WithdrawService()
 job_hist_control_service = JobHistControlService()
 
 
-# PostMan 테스트 용
-@app.route('/', methods=['GET'])
-def hello():
-    return "this is banking"
-
-
 @app.route('/api/v1/<account_id>/transactions', methods=['GET'])
 def get_transactions(account_id):
     if request.json is None:
@@ -53,16 +47,6 @@ def get_transactions(account_id):
     if hist_request.request_dttm is None:
         hist_request.request_dttm = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # 디버깅을 위해 쿼리 파라미터를 출력
-    ''' ###################  로컬테스트 디버깅 용 ################### '''
-    # print(f"  account_id: {hist_request.account_id}"
-    #       f", customer_id: {hist_request.customer_id}"
-    #       f", search_from_dt: {hist_request.search_from_dt}"
-    #       f", search_to_dt: {hist_request.search_to_dt}"
-    #       f", filter_action: {hist_request.filter_action}"
-    #       f", request_time: {hist_request.request_dttm}")
-    ''' ######################################################## '''
-
     # 계좌 유효성 검사
     is_valid = account_search_service.check_valid_account_by_customer_id( session=session
                                                                           , account_id=hist_request.account_id
@@ -76,19 +60,9 @@ def get_transactions(account_id):
         )
         return jsonify(error_response.model_dump())
 
-    ''' ###################  로컬테스트 디버깅 용 ################### '''
-    print("search_banking_hist_by_conditions 전 ")
-    # print(hist_request.account_id)
-    # print(hist_request.customer_id)
-    # print(hist_request.search_from_dt)
-    # print(hist_request.search_from_dt)
-    ''' ######################################################## '''
-
     banking_hist_response = account_search_service.search_banking_hist_by_conditions(session=session
-                                                             , hist_request=hist_request)
-    ''' ###################  로컬테스트 디버깅 용 ################### '''
-    print("search_banking_hist_by_conditions 후 ")
-    ''' ######################################################## '''
+                                                                                    , hist_request=hist_request)
+
     # 조회 코드 작성해야 함
     return jsonify(banking_hist_response.model_dump())
 
@@ -104,11 +78,9 @@ def deposit():
 
     # 트랜잭션 시작
     session = Session()
-    print("트랜잭션 시작")
 
     # API 데이터 <-> 객체 변환
     deposit_request = DepositRequest(**request.json)
-    print("API 데이터 <-> 객체 변환")
 
     # 작업 이력 테이블 내 요청 내용 기록
     job_hist, job_id = job_hist_control_service.insert_ready_job(session = session
@@ -117,33 +89,27 @@ def deposit():
                                                                  , amount = int(deposit_request.amount)
                                                                  , job_div = "0001")
     session.commit()
-    print("작업 이력 테이블 내 요청 내용 기록")
 
     # 계좌 유효성 검사
     is_valid = account_search_service.check_valid_account_by_customer_id(session= session
                                                                          , account_id = deposit_request.account_id
                                                                          , customer_id = deposit_request.customer_id)
-    print("계좌 유효성 검사")
     if not is_valid:
         # 작업 이력 테이블 내 작업 실패 기록
         job_hist_control_service.update_fail_job(session=session, job_id=job_id)
         # 작업 실패 응답 반환
-        error_response = ErrorResponse(
-            account_id=deposit_request.account_id
-            , customer_id=deposit_request.customer_id
-            , error_cd=str(4444)
-            , error_reason="고객 계좌번호 미보유"
-        )
+        error_response = ErrorResponse(account_id=deposit_request.account_id
+                                        , customer_id=deposit_request.customer_id
+                                        , error_cd=str(4444)
+                                        , error_reason="고객 계좌번호 미보유")
         return jsonify(error_response.model_dump())
 
     # 입금 수행
     deposit_response = deposit_service.deposit(session = session, request_obj=deposit_request, job_req_id= job_id)
-    print("입금 수행")
 
     # 작업 이력 테이블 내 작업 성공 기록
     job_hist_control_service.update_success_job(session = session, job_id=job_id)
     session.commit()
-    print("작업 이력 테이블 내 작업 성공 기록")
 
     return jsonify(deposit_response.model_dump())
 
@@ -179,12 +145,10 @@ def withdraw():
         # 작업 이력 테이블 내 작업 실패 기록
         job_hist_control_service.update_fail_job(session=session, job_id=job_id)
         # 작업 실패 응답 반환
-        error_response = ErrorResponse(
-            account_id=withdraw_request.account_id
-            , customer_id=withdraw_request.customer_id
-            , error_cd=str(9999)
-            , error_reason="고객 계좌번호 미보유"
-        )
+        error_response = ErrorResponse(account_id=withdraw_request.account_id
+                                        , customer_id=withdraw_request.customer_id
+                                        , error_cd=str(9999)
+                                        , error_reason="고객 계좌번호 미보유")
         return jsonify(error_response.model_dump())
 
     # 출금 수행

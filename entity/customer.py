@@ -1,6 +1,5 @@
 
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Column, Integer, String
 
 class Customer:
     __tablename__ = "customer"
