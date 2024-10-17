@@ -17,6 +17,7 @@
 
 일반 텍스트의 경우에는 확장 가능성만 고려하였습니다. 시스템을 운영하면서 향후 자료형을 변경하게 되면 여러 부작용이 발생할 수 있기 때문에 **적요 항목**의 경우 `TEXT` 자료형을 설정하였습니다. 그 외에 자료형은 `VARCHAR` 자료형을 사용했습니다.
 
+![erd](https://github.com/user-attachments/assets/634c8379-b300-42df-889e-4e17f90afac0)
 
 
 # API Endpoint 설명
