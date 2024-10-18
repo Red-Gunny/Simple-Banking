@@ -152,13 +152,17 @@ def withdraw():
         return jsonify(error_response.model_dump())
 
     # 출금 수행
-    wtihdraw_response = withdraw_service.withdraw(session=session, request_obj = withdraw_request, job_req_id=job_id)
+    withdraw_response = withdraw_service.withdraw(session=session, request_obj = withdraw_request, job_req_id=job_id)
+    if withdraw_response.stat_cd == "9999":
+        job_hist_control_service.update_fail_job(session=session, job_id=job_id)
+        session.commit()
+        return jsonify(withdraw_response.model_dump())
 
     # 작업 이력 테이블 내 작업 성공 기록
     job_hist_control_service.update_success_job(session=session, job_id=job_id)
     session.commit()
 
-    return jsonify(wtihdraw_response.model_dump())
+    return jsonify(withdraw_response.model_dump())
 
 
 if __name__ == '__main__':

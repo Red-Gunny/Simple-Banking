@@ -22,7 +22,7 @@ class WithdrawService:
                                                                                 , account_id = request_obj.account_id)
         # 계좌 잔고 에러
         if last_account.balance < int(request_obj.amount):
-            return False, "8899"
+            return self.to_WithdrawResponse(request_obj=request_obj, is_success=False, job_req_id=job_req_id)
 
         # (2) 계좌 기본 수정
         self.account_base_repository.update_balance_and_last_proc_dttm(session=session
