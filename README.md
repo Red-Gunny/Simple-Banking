@@ -125,6 +125,9 @@ GET http://127.0.0.1:5000/api/v1/123/transactions?customer_id=hong&search_from_d
 }
 ```
 
+#### 주요 예외사항
+조회결과 거래내역이 없는 경우 -> Bankings는 빈 리스트이며, banking_cnt는 0으로 세팅
+
 ## 2. 입금 API
 
 ### (1) 개요
@@ -256,7 +259,7 @@ GET http://127.0.0.1:5000/api/v1/123/transactions?customer_id=hong&search_from_d
 {
     "account_id": "123",
     "customer_id": "hong",
-    "proc_id": "req123456",
+    "proc_id": "온라인 요청 식별자",
     "stat_cd": "0000"
 }
 
@@ -266,8 +269,44 @@ GET http://127.0.0.1:5000/api/v1/123/transactions?customer_id=hong&search_from_d
 {
     "account_id": "123",
     "customer_id": "hong",
-    "proc_id": "req123456",
+    "proc_id": "온라인 요청 식별자",
     "stat_cd": "9999"
 }
+```
 
+#### 주요 상태코드 정보
+0000 - 정상 출금  /  9999 - 계좌 잔고 부족
+
+## 4. 주요 예외처리 사항
+
+### (1) API 공통 사항 -  고객에 해당하는 계좌가 존재하지 않을 경우
+에러코드 : 4444 / 에러사유 : 고객 계좌번호 미보유
+
+```json
+{
+    "account_id" : "요청 계좌번호",
+    "customer_id" : "요청 고객번호",
+    "error_cd": "4444",
+    "error_reason": "고객 계좌번호 미보유"
+}
+```
+
+### (2) API 공통 사항 -  JSON 내용 포맷이 잘못된 경우
+```json
+{
+    "error_cd": "9999",
+    "error_reason": "JSON 객체 오류"
+}
+```
+### (3) 거래내역 조회 API -  조회 결과 거래내역이 없는 경우
+빈 거래리스트와 banking count는 0으로 반환함
+
+### (4) 출금 API - 출금 진행 시 계좌 잔고가 부족할 경우
+```json
+{
+    "account_id": "요청 계좌번호",
+    "customer_id": "요청 고객번호",
+    "proc_id": "온라인 요청 식별자",
+    "stat_cd": "9999"
+}
 ```
