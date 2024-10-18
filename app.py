@@ -33,7 +33,9 @@ job_hist_control_service = JobHistControlService()
 def get_transactions(account_id):
     if request.json is None:
         error_response = ErrorResponse(
-            error_cd = str(9999)
+            account_id = "-1"
+            , customer_id = "-1"
+            , error_cd = str(9999)
             , error_reason = "JSON 객체 오류"
         )
         return jsonify(error_response.model_dump())
@@ -71,7 +73,9 @@ def get_transactions(account_id):
 def deposit():
     if request.json is None:
         error_response = ErrorResponse(
-            error_cd=str(9999)
+            account_id = "-1"
+            , customer_id = "-1"
+            , error_cd=str(9999)
             , error_reason="JSON 객체 오류"
         )
         return jsonify(error_response.model_dump())
@@ -118,7 +122,9 @@ def deposit():
 def withdraw():
     if request.json is None:
         error_response = ErrorResponse(
-            error_cd=str(9999)
+            account_id="-1"
+            , customer_id="-1"
+            , error_cd=str(9999)
             , error_reason="JSON 객체 오류"
         )
         return jsonify(error_response.model_dump())
