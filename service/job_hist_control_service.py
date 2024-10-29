@@ -1,14 +1,17 @@
 import uuid
 from datetime import datetime
 
+from injector import inject
+
 from entity.job_hist import JobHist
 from repository.job_hist_repository import JobHistRepository
 
 
 class JobHistControlService:
 
-    def __init__(self):
-        self.job_hist_repository = JobHistRepository()
+    @inject
+    def __init__(self, jobHistRepository: JobHistRepository):
+        self.job_hist_repository = jobHistRepository
 
     # 요청 시 최초 작업 기록
     def insert_ready_job(self, session, customer_id : str, account_id : str, amount : int, job_div : str):

@@ -29,6 +29,26 @@ withdraw_service = WithdrawService()
 job_hist_control_service = JobHistControlService()
 
 
+'''
+TODO : 리팩토링 한다면 이렇게 될 것임.
+
+def configure(binder: Binder):
+    account_base = AccountBaseRepository()
+    account_hist = AccountHistRepository()
+    job_hist = JobHistControlRepository()
+    
+    binder.bind(AccountBaseRepository, to=account_base, scope=singleton)    # 디폴트는 None
+    binder.bind(AccountHistRepository, to=account_hist, scope=singleton)    # 디폴트는 None
+    binder.bind(JobHistControlRepository, to=job_hist, scope=singleton)    # 디폴트는 None
+
+injector = Injector(configure)
+account_search_service = injector.get(AccountSearchService)
+deposit_service = injector.get(DepositService)
+withdraw_service = injector.get(WithdrawService)
+job_hist_control_service = injector.get(JobHistControlService)
+'''
+
+
 @app.route('/api/v1/<account_id>/transactions', methods=['GET'])
 def get_transactions(account_id):
     if request.json is None:
